@@ -1,0 +1,132 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef char ElemType;
+
+typedef struct BiNode{
+    ElemType c;
+    struct BiNode *lchild;
+    struct BiNode *rchild;
+}BiNode,*BiTree;
+
+typedef struct tag{
+    BiTree p;
+    struct tag *pnext;
+}tag_t,*ptag_t;
+
+typedef BiTree BiType;
+
+typedef struct LinkNode{
+    BiType data;
+    LinkNode* next;
+}LinkNode;
+
+typedef struct{
+    LinkNode* front,*rear;
+}LinkQueue;
+
+void InitQueue(LinkQueue &Q){
+    Q.front=Q.rear=(LinkNode *)malloc(sizeof(LinkNode));
+    Q.front->next=NULL;
+}
+
+bool IsEmpty(LinkQueue Q){
+    return Q.front==Q.rear;
+}
+
+void EnQueue(LinkQueue &Q,BiType x){
+    LinkNode* s=(LinkNode*)malloc(sizeof(LinkNode));
+    s->data=x;
+    s->next=NULL;
+    Q.rear->next=s;
+    Q.rear=s;
+}
+
+bool DeQueue(LinkQueue &Q,BiType &x){
+    if(Q.front==Q.rear)
+        return false;
+    LinkNode* q=Q.front->next;
+    x=q->data;
+    Q.front->next=q->next;
+    if(Q.rear==q){
+        Q.rear=Q.front;
+    }
+    free(q);
+    return true;
+}
+
+void InOrder(BiTree T) {
+    if(T!= NULL) {
+        InOrder(T->lchild);
+        printf("%c", T->c);
+        InOrder(T->rchild);
+    }
+}
+
+void PostOrder(BiTree T) {
+    if(T!= NULL) {
+        PostOrder(T->lchild);
+        PostOrder(T->rchild);
+        printf("%c", T->c);
+    }
+}
+
+void LevelOrder(BiTree T){
+    LinkQueue Q;
+    InitQueue(Q);
+    BiType p;
+    EnQueue(Q,T);
+    while(!IsEmpty(Q)){
+        DeQueue(Q,p);
+        printf("%c",p->c);
+        if(p->lchild!=NULL){
+            EnQueue(Q,p->lchild);
+        }
+        if(p->rchild!=NULL){
+            EnQueue(Q,p->rchild);
+        }
+    }
+
+}
+
+int main(){
+    BiTree pnew;
+    BiTree tree=NULL;
+
+    ptag_t phead=NULL,ptail=NULL,listpnew=NULL, pcur;
+
+    ElemType c;
+    while(scanf("%c",&c)){
+        if(c=='\n'){
+            break;
+        }
+        pnew=(BiTree)calloc(1,sizeof(BiNode));
+        pnew->c=c;
+        listpnew=(ptag_t)calloc(1,sizeof(tag_t));
+        listpnew->p=pnew;
+        if(tree==NULL){
+            tree=pnew;
+            phead=listpnew;
+            ptail=listpnew;
+            pcur=listpnew;
+        }
+        else{
+            ptail->pnext=listpnew;
+            ptail=listpnew;
+            if(pcur->p->lchild==NULL){
+                //pcur->p->lchild=pnew;
+                pcur->p->lchild=listpnew->p;
+            }
+            else if(pcur->p->rchild==NULL){
+                pcur->p->rchild=listpnew->p;
+                pcur=pcur->pnext;
+            }
+        }
+    }
+    InOrder(tree);
+    printf("\n");
+    PostOrder(tree);
+    printf("\n");
+    LevelOrder(tree);
+    return 0;
+}
